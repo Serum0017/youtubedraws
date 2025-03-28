@@ -65,7 +65,7 @@ global.app = uWS.App().ws('/*', {
         // send image
         ws.id = generateId();
         clients[id] = ws;
-        rateLimits[id] = performance.now();
+        rateLimits[ws.ip || id] = performance.now();
 
         // make sure to like and subscribe
         ws.subscribe('global');
@@ -86,10 +86,10 @@ global.app = uWS.App().ws('/*', {
 
         const t = performance.now();
 
-        if(t - rateLimits[ws.id] < placeDelay - 500){
+        if(t - rateLimits[ws.ip || ws.id] < placeDelay - 500){
             return;
         }
-        rateLimits[ws.id] = t;
+        rateLimits[ws.ip || ws.id] = t;
 
         const decoded = new Uint16Array(data);
 
@@ -106,7 +106,7 @@ global.app = uWS.App().ws('/*', {
     close: (ws) => {
         // removeClient(ws, true);
         delete clients[ws.id];
-        delete rateLimits[ws.id];
+        delete rateLimits[ws.ip || ws.id];
 
         if(ws.ip){
             delete connectedIps[ws.ip];
