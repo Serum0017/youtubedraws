@@ -10,7 +10,7 @@ const ytClientSecret = Your youtube api client_secret (probably starts with {"we
 const titleVideoId = "yourVideoId";// e.g. dQw4w9WgXcQ
 const thumbnailVideoId = "yourOtherVideoId";
 
-export default {dbUri, ytClientSecret};
+export default {dbUri, ytClientSecret, titleVideoId, thumbnailVideoId};
 ```
 
 You can get the mongodb secret just from setting up a free database (mongodb.com) and you can get your youtube token from the google developer dashboard, or by following this tutorial: https://developers.google.com/youtube/v3/quickstart/nodejs.
