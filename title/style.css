@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Ubuntu:wght@300;400;500;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: rgb(5,5,5);
+    font-size: 16px;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+.menu {
+    /* background-color: rgb(5,5,5); */
+    position: fixed;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.nameInput {
+    outline: none;
+    margin: 5px;
+    height: 20px;
+    width: 200px;
+
+    box-shadow: 0px 0px 10px 2px white;
+    outline: none;
+    border: none;
+    color: white;
+    background: rgba(0,0,0,1);
+    padding: 5px;
+    font-size: 1.25rem;
+    position: relative;
+    width: 350px;
+    height: 30px;
+    text-align: center;
+}
+
+.playForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.title {
+    position: relative;
+    top: -28px;
+    font-size: 3.5rem;
+    text-shadow: 0px 0px 15px white;
+    user-select: none;
+    color: white;
+}
+
+.hidden {
+    display: none !important;
+}
+
+canvas, .gui {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.text-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 1600px;
+	height: 900px;
+	filter: none !important;
+	background: transparent;
+	overflow: hidden;
+}
+
+.small {
+    font-size: 1.5rem;
+    top: 1.46rem;
+}
+
+.topBtn {
+    border-radius: 1.3rem;
+    border: none;
+    min-width: 4.5rem;
+    background-color: #212121;
+    color: #f1f1f1;
+    margin-left: 0.72vw;
+    cursor: pointer;
+    transition: background-color 0.1s;
+    height: 2.6rem;
+    transform: translate(0, 2.9rem);
+}
+
+.topBtn:hover {
+    background-color: #282828;
+}

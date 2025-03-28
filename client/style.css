@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;700&display=swap');
+
+* {
+    -webkit-tap-highlight-color: transparent;
+    outline: 0;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+canvas {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+
+
+.centergui {
+    height: 60px;
+    justify-content: center;
+    width: 100%;
+    border-bottom-left-radius: 5px;
+}
+
+body {
+    margin: 0;
+}
+
+#toolMenu {
+    display: flex;
+}
+
+#toolMenu {
+    font-size: 17px;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    /* width: 100vw; */
+    /* width: calc(100vw - 300px); */
+    height: 61px;
+    /* padding: 5px; */
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.25);
+    user-select: none;
+    justify-content: left;
+    border-bottom-right-radius: 5px;
+    flex-wrap: wrap;
+    height: fit-content;
+}
+
+.centergui .submenu {
+    border-bottom-left-radius: 5px;
+}
+
+.menu-button-div {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin: 15px;
+}
+
+.menu-button, .centergui .menu-button {
+    color: red;
+    border: none;
+    font-size: 2rem;
+}
+
+.all-gui {
+    width: 100%;
+    position: relative;
+}
+    
+.selectedPlacable {
+    -webkit-box-shadow:0px 0px 30px 0px rgba(173,173,173,1);
+    -moz-box-shadow: 0px 0px 30px 0px rgba(173,173,173,1);
+    box-shadow: 0px 0px 30px 0px rgba(173,173,173,1);
+}
