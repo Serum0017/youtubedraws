@@ -65,7 +65,7 @@ global.app = uWS.App().ws('/*', {
         // send image
         ws.id = generateId();
         clients[id] = ws;
-        rateLimits[ws.ip || id] = performance.now();
+        if (!rateLimits[ws.ip || id]) rateLimits[ws.ip || id] = performance.now();
 
         // make sure to like and subscribe
         ws.subscribe('global');
@@ -106,7 +106,7 @@ global.app = uWS.App().ws('/*', {
     close: (ws) => {
         // removeClient(ws, true);
         delete clients[ws.id];
-        delete rateLimits[ws.ip || ws.id];
+        if(!ws.ip) delete rateLimits[ws.id];
 
         if(ws.ip){
             delete connectedIps[ws.ip];
