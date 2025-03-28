@@ -1,6 +1,6 @@
 Youtube Draws!
 
-To run this site, all you need to do is specify a few things. Create a file in the server directory called secrets.js in the following format:
+To run this site, all you need to do is specify a few things. Create a file in /server called secrets.js with the following format:
 
 ```
 const dbUri = "a mongodb connection uri, probably starting with mongodb+srv://";
