@@ -1,7 +1,5 @@
 Youtube Draws!
 
-I ran out of a month's worth of bandwidth in 5 days, so i'm open sourcing this project to give others who have the resources an opportunity to keep the site alive.
-
 To run this site, all you need to do is specify a few things. Create a file in the server directory called secrets.js in the following format:
 
 ```
