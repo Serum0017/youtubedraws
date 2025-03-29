@@ -143,8 +143,16 @@ global.app = uWS.App().ws('/*', {
 function getIp(res, req) {
     // Try to get the real client IP from proxy headers
     let forwardedIp = req.getHeader('x-forwarded-for') || req.getHeader('x-real-ip');
+    
     if (forwardedIp) {
-      return forwardedIp.split(',')[0].trim(); // Handle multiple IPs in X-Forwarded-For
+        forwardedIp = forwardedIp.split(',')[0].trim(); // Handle multiple IPs in X-Forwarded-For
+    
+        const ipRegex = /\b(?:(?:25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\b/;
+        forwardedIp = forwardedIp.match(ipRegex)?.[0] || false; // Make sure it is a valid ip, and if not, skip over
+        
+        if (forwardedIp) {
+          return forwardedIp.split(',')[0].trim();
+        }
     }
   
     // Fallback: Get the direct remote address
