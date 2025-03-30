@@ -2,6 +2,7 @@ import uWS from 'uWebSockets.js';
 import yt from './ytapi.js';
 const {uploadThumbnail, updateTitle} = yt;
 import fs from 'fs';
+import {createHash} from 'crypto';
 import '../shared/constants.js';
 
 import {createCanvas} from 'canvas';
@@ -123,6 +124,13 @@ global.app = uWS.App().ws('/*', {
             }
             connectedIps[ip] = true;
         }
+
+        let token = decodeURI(req.getUrl().replace('/', ''));
+        if (token != hash(ip + TBR) + "/" + req.getHeader('user-agent')) {
+            console.log('rejecting, invalid token');
+            res.end("Connection rejected");
+            return;
+        }
     
         res.upgrade(
             { ip },  // Attach IP to the WebSocket object
@@ -143,8 +151,16 @@ global.app = uWS.App().ws('/*', {
 function getIp(res, req) {
     // Try to get the real client IP from proxy headers
     let forwardedIp = req.getHeader('x-forwarded-for') || req.getHeader('x-real-ip');
+    
     if (forwardedIp) {
-      return forwardedIp.split(',')[0].trim(); // Handle multiple IPs in X-Forwarded-For
+        forwardedIp = forwardedIp.split(',')[0].trim(); // Handle multiple IPs in X-Forwarded-For
+    
+        const ipRegex = /\b(?:(?:25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\b/;
+        forwardedIp = forwardedIp.match(ipRegex)?.[0] || false; // Make sure it is a valid ip, and if not, skip over
+        
+        if (forwardedIp) {
+          return forwardedIp.split(',')[0].trim();
+        }
     }
   
     // Fallback: Get the direct remote address
@@ -175,10 +191,11 @@ app.get("/title", (res, req) => {
 });
 
 app.get("/:filename/:filename2", (res, req) => {
-    if(req.getParameter(0) === 'server') {res.cork(()=>{res.end();});return;}
+    if(req.getParameter(0) === 'server' || req.getParameter(0) == '.git') 
+        {res.cork(()=>{res.end();});return;}
     let path = req.getParameter(0) + '/' + req.getParameter(1);
     if (fs.existsSync(path) && fs.statSync(path).isFile()) {
-        const isCss = path.slice(path.length-3) === 'css';
+        const isCss = path.slice(path.length-3) === 'css'; //why serum istg 😭
         if(isCss === true) res.writeHeader("Content-Type", "text/css");
         else res.writeHeader("Content-Type", "text/javascript");
         const file = fs.readFileSync(path);
@@ -282,4 +299,28 @@ setInterval(() => {
 
     console.log('unqueueing and updating', {nextTitle});
     updateTitle(nextTitle, titleVideoId);
-}, titleUpdateTime * 60 * 1000)
+}, titleUpdateTime * 60 * 1000);
+
+function hash(data) { // hash data into hex
+    let h = createHash('sha256');
+    h.update(data);
+    return h.digest('hex');
+}
+
+// time-based random, updates each minute
+function genTBR() {
+    TBR = Math.floor(Math.random() * (36 ** 8 - 1)).toString(36)
+}
+
+let TBR; // hash this with the IP to get a token
+
+setInterval(genTBR, 60e3);
+genTBR();
+
+app.get("/test.js", (res, req) => {
+    let ip = getIp(res, req);
+    let token = hash(ip + TBR);
+    res.writeHeader('Cache-Control', '0');
+    res.writeHeader('Access-Control-Allow-Origin', '*'); // this is to help out doofus
+    res.end(`window.TK = "${token}";`);
+});

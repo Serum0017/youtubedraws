@@ -121,17 +121,17 @@ function render(){
     ctx.setTransform(t);
 
     // cooldown = 5.29;
-    if(cooldown > 0){
+    if(!connected || cooldown > 0){
         ctx.font = '700 42px monospace';
         // ctx.textAlign = 'center';
         // ctx.textBaseline = 'middle';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'bottom';
 
-        const text = 'Cooldown: ' + (cooldown / 1000).toFixed(1) + 's';
+        const text = !connected ? 'Disconnected...' : 'Cooldown: ' + (cooldown / 1000).toFixed(1) + 's';
 
         // const t = ctx.measureText(text);
-        
+
         // const w = t.width + 20;
         // const h = t.actualBoundingBoxAscent + t.actualBoundingBoxDescent + 20;
 
@@ -145,7 +145,7 @@ function render(){
 
         const margin = 20;
 
-        const t = cooldown / placeDelay;
+        const t = !connected ? 0.5 : cooldown / placeDelay;
 
         let translationY = 0;
 
@@ -182,50 +182,66 @@ function smoothStep(t){
 
 requestAnimationFrame(render);
 
-let ws = new WebSocket(HOST);
-ws.binaryType = "arraybuffer";
+let ws, connected;
+let attempt = 0;
 
-ws.addEventListener("message", function (data) {
-    const decoded = new Uint16Array(data.data);
+function connect() {
+    if (ws && ws.readyState != WebSocket.CLOSED)
+        ws.close(); // close websocket if connect is called while open
 
-    if(decoded.byteLength > 6){
-        // this is an entire reset of the canvas
-        let ind = 0;
-        for(let i = 0; i < thumbnailW; i++){
-            for(let j = 0; j < thumbnailH; j++){
-                thumbnail[i][j] = decoded[ind++];
+    // include token and user agent in ws to validate
+    ws = new WebSocket(HOST + "/" + (window.TK || "") + "/" + navigator.userAgent);
+    ws.binaryType = "arraybuffer";
+
+    ws.addEventListener("message", function (data) {
+        const decoded = new Uint16Array(data.data);
+
+        if(decoded.byteLength > 6){
+            // this is an entire reset of the canvas
+            let ind = 0;
+            for(let i = 0; i < thumbnailW; i++){
+                for(let j = 0; j < thumbnailH; j++){
+                    thumbnail[i][j] = decoded[ind++];
+                }
             }
+        } else {
+            // put a single pixel
+            thumbnail[decoded[0]][decoded[1]] = decoded[2];
         }
-    } else {
-        // put a single pixel
-        thumbnail[decoded[0]][decoded[1]] = decoded[2];
-    }
-    changed = true;
-});
+        changed = true;
+    });
 
-let connected = false;
-window.send = () => {};
-
-ws.onopen = () => {
-    connected = true;
-    window.send = (data) => {
-        ws.send(data);
-    }
-
-    // format: x pos, y pos, color
-    // const buf = new Uint16Array(3);
-    // buf[0] = 0;
-    // buf[1] = 1;
-    // buf[2] = 0;
-    // send(buf);
-}
-
-ws.onclose = () => {
     connected = false;
-    console.log('disconnected');
-    alert('disconnected from server. This can happen if you open multiple tabs, you lose internet, or the server crashed. Try reloading, maybe you can reconnect.');
     window.send = () => {};
+
+    ws.onopen = () => {
+        connected = true;
+        attempt = 0;
+        window.send = (data) => {
+            ws.send(data);
+        }
+
+        // format: x pos, y pos, color
+        // const buf = new Uint16Array(3);
+        // buf[0] = 0;
+        // buf[1] = 1;
+        // buf[2] = 0;
+        // send(buf);
+    }
+
+    ws.onclose = () => {
+        connected = false;
+        console.log('disconnected');
+        if (++attempt < 3) { // retry 3 times
+            setTimeout(connect, 1e3);
+        } else {
+            alert('Failed to connect to server! \nThis can happen if you open multiple tabs, ' +
+                'you lose internet, or the server is down. Try reloading in a minute.');
+            window.send = () => { };
+        }
+    }
 }
+connect();
 
 window.onresize = () => {
     canvas.width = canvas.w = window.innerWidth;
@@ -462,6 +478,7 @@ window.onmouseup = (e) => {
     }
 }
 
+// does not work for mobile firefox
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 let joystick = {
